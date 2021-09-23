@@ -1,0 +1,40 @@
+.monthly-billing-cycle {
+    border-bottom: 1px solid #d8d8d8;
+    border-top: 1px solid #d8d8d8;
+    padding: 16px;
+    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 16px;
+}
+.monthly-billing-cycle-label {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.button {
+    appearance: none;
+    background: none;
+    font-size: 16px;
+    outline: line;
+    border: 2px solid  #207ed0;;
+    color:  #207ed0;
+    cursor: pointer;
+    background-color: none;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+
+.monthly-billing-cycle-button-container > button {
+    margin-left: 4px;
+    margin-right: 8px;
+}
+
+.button:hover,
+.button:focus {
+  border: 2px solid #d0deff;
+  background-color: #d0deff;
+  color:  white;
+}
+
+.button:active {
+  background-color: #d0deff;
+}

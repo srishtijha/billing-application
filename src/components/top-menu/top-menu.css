@@ -1,0 +1,15 @@
+.top-menu {
+    height: 50px;
+    background: #207ed0;
+    padding-left: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.top-menu-header {
+    color: white;
+    font-size: 28px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bolder;
+}

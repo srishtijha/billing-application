@@ -2,10 +2,16 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     addBill,
+    updateBills,
+    deleteBills,
     selectBills,
 } from '../../redux/bills/billsSlice';
 import styles from './Bills.module.css';
 import Table from './components/bills-table/index';
+import AddBillsSection from './components/add-bills-section/index';
+import FilterSection from './components/filter-section/index';
+import MonthlyBillingCycle from './components/monthly-billing-cycle/index';
+import PayBills from './components/pay-bills/index';
 
 export function Bills() {
     const bills = useSelector(selectBills);
@@ -13,91 +19,14 @@ export function Bills() {
     const [data, setData] = useState(bills);
     const [showAddBillModal, setShowAddBillModal] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
-    const [categoryFilter, setCategoryFilter] = useState(undefined);
-    // const [applyFilter, setApplyFilter] = useState(false)
-    const [id, setId] = useState(null)
-    const [description, setDescription] = useState(null)
-    const [category, setCategory] = useState(null)
-    const [amount, setAmount] = useState(null)
-    const [date, setDate] = useState(null)
+    const [categoryFilter, setCategoryFilter] = useState("default");
+    const [showMonthlyBillingCycle, setMonthlyBillingCycle] = useState(false);
+    const [showPayBills, setShowPayBills] = useState(false);
+    const [billsToBePayedCount, setBillsToBePayedCount] = useState(0);
 
     React.useEffect(() => {
         setData(bills)
     }, [bills])
-
-    // React.useEffect(() => {
-    //     if (categoryFilter) {
-    //         console.log("Here", categoryFilter)
-    //         setData(bills.filter((bill) => bill.category === categoryFilter))
-    //     } else {
-    //         setData(bills)
-    //     }
-    // }, [applyFilter])
-
-    console.log("Bills", bills)
-
-    const handleChange = (e) => {
-        // setApplyFilter(false)
-        switch (e.target.id) {
-            case "billing-id": setId(e.target.value);
-                break;
-            case "description": setDescription(e.target.value);
-                break;
-            case "category": setCategory(e.target.value);
-                break;
-            case "amount": setAmount(e.target.value);
-                break;
-            case "date": setDate(e.target.value);
-                break;
-        }
-    }
-
-    const constructBill = () => {
-        return {
-            id,
-            description,
-            category,
-            amount,
-            date
-        }
-    }
-
-    const renderAddBillModal = () => {
-        return (
-            <div>
-                Add Bill
-                <label>
-                    ID:
-                <input type="text" id="billing-id" value={id} onChange={handleChange} />
-                </label>
-                <label>
-                    Description:
-                <input type="text" id="description" value={description} onChange={handleChange} />
-                </label>
-                <label>
-                    Category:
-                <input type="text" id="category" value={category} onChange={handleChange} />
-                </label>
-                <label>
-                    Amount:
-                <input type="text" id="amount" value={amount} onChange={handleChange} />
-                </label>
-                <label>
-                    Date:
-                <input type="text" id="date" value={date} onChange={handleChange} />
-                </label>
-                <button
-                    onClick={() => dispatch(addBill(constructBill()))}>
-                    Add
-                </button>
-                <button
-                    onClick={() => setShowAddBillModal(false)}>
-                    Cancel
-                </button>
-
-            </div>
-        )
-    }
 
     const handleFilterChange = (e) => {
         setCategoryFilter(e.target.value)
@@ -107,40 +36,20 @@ export function Bills() {
         setShowFilter(false)
         setCategoryFilter(undefined)
         setData(bills)
+        setCategoryFilter("default");
     }
 
     const handleFilter = () => {
-        if (categoryFilter) {
-            console.log("Here", categoryFilter)
+        if (categoryFilter && categoryFilter !== "default") {
             setData(bills.filter((bill) => bill.category === categoryFilter))
         }
     }
 
-    const renderFilter = () => {
-        // const filterValues = bills.map(bill => bill.category);
-        return (
-            <div>
-                <label>
-                    Select Category
-                <select value={categoryFilter} onChange={handleFilterChange}>
-                        {bills.map((bill) => <option value={bill.category}>{bill.category}</option>)}
-                    </select>
-                </label>
-                <button
-                    onClick={handleFilter}>
-                    Filter
-                </button>
-                <button
-                    onClick={handleCancelFilter}>
-                    Cancel
-                </button>
-            </div>
-
-        )
-    }
-
-    // console.log("STATE VALUE:", bills)
     const columns = [
+        {
+            Header: "",
+            accessor: "editOption"
+        },
         {
             Header: 'Billing Id',
             accessor: 'id'
@@ -160,30 +69,141 @@ export function Bills() {
         {
             Header: 'Date',
             accessor: 'date'
-        },
+        }, {
+            Header: "",
+            accessor: "deleteOption"
+        }
     ]
+
+    const onAddBill = (billData) => {
+        dispatch(addBill(billData));
+        setShowAddBillModal(false);
+    }
+
+    const closeAddBillSection = () => setShowAddBillModal(false);
+
+    const updateBill = (id, updatedBill) => {
+        dispatch(updateBills({ id, updatedBill }));
+    }
+
+    const deleteBill = (id, updatedBill) => {
+        dispatch(deleteBills(id));
+    }
+
+    const closeMonthlyBillingSection = () => setMonthlyBillingCycle(false);
+    const totalBillAmount = bills.reduce((accumulator, elem) => {
+        return accumulator + parseInt(elem.amount, 10);
+    }, 0);
+
+    const closePayBills = () => {
+        setShowPayBills(false)
+        setData(bills)
+        setBillsToBePayedCount(0)
+    };
+
+    const onAddBtnClick = () => {
+        setShowAddBillModal(true)
+        setShowFilter(false)
+        setMonthlyBillingCycle(false)
+        setCategoryFilter("default");
+        setShowPayBills(false)
+    }
+
+    const onFilterClick = () => {
+        setShowFilter(true)
+        setShowAddBillModal(false)
+        setShowPayBills(false)
+        setMonthlyBillingCycle(false)
+    }
+
+    const onBillingCycleClick = () => {
+        setMonthlyBillingCycle(true)
+        setShowAddBillModal(false)
+        setShowFilter(false)
+        setShowPayBills(false)
+        setCategoryFilter("default");
+    }
+
+    const onPayBillsClick = () => {
+        setShowPayBills(true)
+        setMonthlyBillingCycle(false)
+        setShowAddBillModal(false)
+        setShowFilter(false)
+        setCategoryFilter("default");
+
+    }
+
+    const checkPayableBills = (budget) => {
+        const sortedBills = bills.slice().sort((a, b) => b.amount - a.amount);
+        let amountRemaining = parseInt(budget, 10);
+        let count = 0;
+        const listOfBillsToBePayed = [];
+        sortedBills.forEach((bill) => {
+            if (parseInt(bill.amount, 10) <= amountRemaining) {
+                amountRemaining -= parseInt(bill.amount, 10);
+                count++;
+                listOfBillsToBePayed.push(bill);
+            }
+        })
+
+        setBillsToBePayedCount(count);
+        setData(listOfBillsToBePayed);
+
+    }
 
     return (
         <div>
             <div className={styles.row}>
                 <button
                     className={styles.button}
-                    // onClick={() => dispatch(addBill(dummy))}
-                    onClick={() => setShowAddBillModal(true)}>
+                    onClick={onAddBtnClick}>
                     Add bill
                 </button>
                 <button
                     className={styles.button}
-                    // onClick={() => dispatch(addBill(dummy))}
-                    onClick={() => setShowFilter(true)}>
+                    onClick={onFilterClick}>
                     Filter
                 </button>
+                <button
+                    className={styles.button}
+                    onClick={onBillingCycleClick}>
+                    Billing Cycle
+                </button>
+                <button
+                    className={styles.button}
+                    onClick={onPayBillsClick}>
+                    Pay bills
+                </button>
             </div>
-            {showAddBillModal && renderAddBillModal()}
-            {showFilter && renderFilter()}
+
+            <div className={styles.row}>
+                <div className={styles.total}>
+                    Total Amount: <span className={styles.amount}>{"Rs." + totalBillAmount}</span>
+                </div>
+            </div>
+
+            {showAddBillModal && <AddBillsSection
+                addBill={onAddBill}
+                onClose={closeAddBillSection} />}
+            {showFilter && <FilterSection
+                bills={bills}
+                categoryFilter={categoryFilter}
+                handleFilter={handleFilter}
+                handleCancelFilter={handleCancelFilter}
+                handleFilterChange={handleFilterChange} />}
+            {showMonthlyBillingCycle && <MonthlyBillingCycle
+                bills={bills}
+                onClose={closeMonthlyBillingSection} />}
+            {showPayBills && <PayBills
+                bills={bills}
+                onClose={closePayBills}
+                checkPayableBills={checkPayableBills}
+                billsToBePayed={billsToBePayedCount} />}
             <Table
                 columns={columns}
-                rows={data} />
+                rows={data}
+                updateBill={updateBill}
+                deleteBill={deleteBill} />
         </div>
     );
 }

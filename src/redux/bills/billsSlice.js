@@ -14,7 +14,7 @@ const initialState = {
       "description": "Car wash",
       "category": "utility",
       "amount": "500",
-      "date": "01-06-2020"
+      "date": "12-06-2020"
     },
     {
       "id": 3,
@@ -38,13 +38,13 @@ const initialState = {
     {
       "id": 6,
       "description": "Laundry", "category": "Personal Care", "amount": "320",
-      "date": "01-14-2020"
+      "date": "01-10-2020"
     },
     {
       "id": 7,
       "description": "Vacation", "category": "Travel",
       "amount": "3430",
-      "date": "01-18-2020"
+      "date": "01-06-2020"
     }
   ]
 };
@@ -56,10 +56,29 @@ export const billsSlice = createSlice({
     addBill: (state, action) => {
       state.value.push(action.payload)
     },
+    updateBills: (state, action) => {
+      if (action.payload.id && action.payload.updatedBill) {
+        state.value = state.value.map((elem) => {
+          if (action.payload.id && elem.id == action.payload.id) {
+            const { description, category, amount, date } = action.payload.updatedBill
+            return {
+              id: elem.id,
+              description,
+              category,
+              amount,
+              date
+            }
+          } else return elem
+        })
+      }
+    },
+    deleteBills: (state, action) => {
+      state.value = state.value.filter((elem) => elem.id != action.payload)
+    }
   },
 });
 
-export const { addBill } = billsSlice.actions;
+export const { addBill, updateBills, deleteBills } = billsSlice.actions;
 
 export const selectBills = (state) => state.bills.value;
 
